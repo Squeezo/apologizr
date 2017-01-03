@@ -16,13 +16,12 @@ router.post('/post', (req, res) => {
   twitterClient.post('statuses/update', {status: newTweet}, (error, tweet, response) => {
     if(error) {
       console.log(error);
-      return res.render('post', {message: error, label: 'Write it', create:'Post it'}})
+      return res.render('post', {message: error[0].message, label: 'Write it', create:'Post it'})
     }
     
     //console.log(tweet);  // Tweet body.
     //console.log(response);  // Raw response object.
-
-    res.render('post', {message: "Tweeted successfully.",label: 'Write it', create:'Post it'})
+    return res.redirect('/post')
 
   });
 

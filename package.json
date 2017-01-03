@@ -1,8 +1,8 @@
 {
   "name": "apologizr",
   "version": "1.0.0",
-  "description": "Quick and Dirty Tweet Scheduler",
-  "main": "tweet.js",
+  "description": "Quick and Dirty Tweet Scraper",
+  "main": "app.js",
   "dependencies": {
     "body-parser": "^1.15.2",
     "dotenv": "^2.0.0",
