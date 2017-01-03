@@ -1,0 +1,19 @@
+doctype html
+html
+  head
+    title= 'Tell everybody how sorry you are.'
+  body
+    div(class='container')
+      h1 Tell everybody how sorry you are.
+      div(id='postErr', class='error') #{message}  
+      div(class='formbox')
+        form(id='postForm',method='post',action='/post')
+          div(class='row')
+            label(for='newTweet', class='long') #{label}
+            textarea(class='newTweet', id='newTweet', name='newTweet')
+          div(class='btn-row')
+            button(type='submit',name='submit') #{create}
+    script(type='text/javascript').
+      document.getElementById('newTweet').addEventListener('click', function(){
+        document.getElementById('postErr').innerHTML = "";
+      }, false);           
