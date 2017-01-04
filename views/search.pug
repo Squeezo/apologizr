@@ -1,0 +1,42 @@
+doctype html
+html
+  head
+    title= 'Search the Sorry State of Twitter'
+    script(type='application/javascript', src='https://cdn.socket.io/socket.io-1.4.5.js')
+    link(rel='stylesheet', href='styles/tweetstream.css')
+  body
+    div(class='container')
+      h1 Search the Sorry State of Twitter.
+      div(id='searchErr', class='error') #{message}  
+      div(class='formbox')
+        form(id='searchForm',method='post',action='/search')
+          div(class='row')
+            label(for='searchFor', class='long') #{label}
+            textarea(id='searchFor', name='searchFor')
+          div(class='btn-row')
+            button(type='submit',name='submit') #{search}
+      div(id='results')      
+    script(type='application/javascript').
+
+      var socket = io.connect('#{siteIP}');
+      socket.on('connect', function(data) {
+        console.log('Client Connected')
+        status.innerHTML = "Connected!"
+      })
+
+      socket.on('results', function (data) {
+        console.log('new tweets: ')
+        console.dir(data);
+        updateDisplay(data)
+      });
+
+      socket.on('disconnect', function (data) {
+        console.log('scoket disconnected');
+        console.dir(data);
+      });
+
+      document.getElementById('searchFor').addEventListener('click', function(){
+        document.getElementById('searchErr').innerHTML = "";
+      }, false);
+
+    script(type='application/javascript', src='scripts/tweetstream.js')             
