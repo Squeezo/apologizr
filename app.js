@@ -4,12 +4,14 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const twitterClient = require('./twitterClient'),
+      mongoClient = require('mongodb').MongoClient,
       expressValidator = require('express-validator'),
       bodyParser = require('body-parser'),
       ip = require('ip');
 
+
 const post = require('./routes/post');
-var socket;
+var socket, db, collection;
 
 app.use(express.static(__dirname + '/public'));
 app.engine('pug', require('pug').__express)
@@ -24,6 +26,19 @@ server.listen(80, (err, response) => {
   if (err) console.log(err.stack)
   const port = server.address().port
   console.log('apologizr listening at port %s', port)
+  if(!twitterClient) {
+    console.log('Error connecting to Twitter.')
+  }
+  
+  mongoClient.connect('mongodb://localhost:27017/apologizr', (err, database) => {
+    if(err) {
+      console.log('error connecting to mongodb', err)
+    } else {
+      console.log('connected to mongo')
+      db = database;
+      collection = db.collection('storedTweets');
+    }
+  })
 })
 
 app.use(post)
@@ -44,14 +59,17 @@ app.post('/search', (req, res) => {
   io.on('connection', (sock) => {
     console.log('Connected')
     socket = sock;
+
+    socket.on('save', (t) => {
+      console.log('Saving Tweet')
+      saveTweet(t)
+    })
   })
-
-
 
   twitterClient.stream('statuses/filter', {track: searchFor}, (stream) => {
 
     stream.on('data', (tweets) => {
-      console.log('got new tweets')
+      //console.log('got new tweets')
       if(!socket.emit) {
         console.log('No socket connection')
       } else {
@@ -70,11 +88,41 @@ app.post('/search', (req, res) => {
 
 })
 
+app.get('/view', (req, res) => {
 
-app.on('listening', () => { 
-  console.log('Initializing Twitter instance')
-  const client = require('twitterClient');
-  if(!client) { 
-    console.log('Error connecting to Twitter.')
-  }
+  collection.find({}).toArray((err, docs) => {
+    console.log(docs)
+    if(err) {
+      return res.render('view', {label: 'Stored Tweets', err: err})
+    }
+
+    return res.render('view', {label: 'Stored Tweets', storedTweets: docs} )
+  });
+
+  
+
 })
+
+var saveTweet = (t) => {
+
+  // Insert some documents
+  collection.insertOne({
+    'tid': t.id,
+    'name': t.name,
+    'screenName': t.screenName,
+    'text' : t.text,
+    'createdAt' : t.createdAt,
+    'profileImage' : t.profileImage
+  }, (err, result) => {
+    if(err) {
+      console.log('error saving tweets', err)
+    } else {
+      console.log("Inserted " + result.insertedId + " documents into the collection");
+    }
+  });
+  
+
+  // var cursor = db.find()
+  // console.log(cursor) 
+} 
+

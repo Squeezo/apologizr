@@ -17,26 +17,5 @@ html
             button(type='submit',name='submit') #{search}
       div(id='results')      
     script(type='application/javascript').
-
-      var socket = io.connect('#{siteIP}');
-      socket.on('connect', function(data) {
-        console.log('Client Connected')
-        status.innerHTML = "Connected!"
-      })
-
-      socket.on('results', function (data) {
-        console.log('new tweets: ')
-        console.dir(data);
-        updateDisplay(data)
-      });
-
-      socket.on('disconnect', function (data) {
-        console.log('scoket disconnected');
-        console.dir(data);
-      });
-
-      document.getElementById('searchFor').addEventListener('click', function(){
-        document.getElementById('searchErr').innerHTML = "";
-      }, false);
-
+      var siteIP = '#{siteIP}';
     script(type='application/javascript', src='scripts/tweetstream.js')             
