@@ -22,7 +22,7 @@ app.disable('x-powered-by')
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressValidator())
 
-server.listen(80, (err, response) => {
+server.listen(8080, (err, response) => {
   if (err) console.log(err.stack)
   const port = server.address().port
   console.log('apologizr listening at port %s', port)
@@ -69,7 +69,6 @@ app.post('/search', (req, res) => {
     socket.on('post', (t) => {
       console.log('Posting Tweet')
       let result = postTweet(t)
-      socket.emit('response', result)
     })
   })
 
@@ -134,16 +133,32 @@ const saveTweet = (t) => {
   });
 } 
 
-const postTweet = (t) => {
+const postTweet = (t) => { 
 
   if(!t) { return 'Missing tweet data'; }
   if(!t.text ) { return 'Missing tweet content'; }
 
-  twitterClient.post('statuses/update', {status: t.text}, (error, tweet, response) => {
-    if(error) { return error; }
+  postPromise = () => {
+      return new Promise( (resolve, reject) => { 
+        twitterClient.post('statuses/update', {status: t.text}, (error, tweet, response) => {
+          if(error) { 
+            reject(error) 
+          } else {
+            resolve(tweet);
+          }
 
-    return 'tweet posted';
-    console.log(tweet);  // Tweet body. 
-    console.log(response);  // Raw response object. 
+        });
+      });
+  }   
+
+  postPromise()
+  .then( (result) => {
+    console.log('promise resolved ', result)
+    socket.emit('response ', result)
+  })
+  .catch( (err) => {
+    console.log('promise failed ', err)
+    socket.emit('response ', result )
   });
-}
+
+} 
