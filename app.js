@@ -62,7 +62,14 @@ app.post('/search', (req, res) => {
 
     socket.on('save', (t) => {
       console.log('Saving Tweet')
-      saveTweet(t)
+      let result = saveTweet(t)
+      socket.emit('response', result)
+    })
+
+    socket.on('post', (t) => {
+      console.log('Posting Tweet')
+      let result = postTweet(t)
+      socket.emit('response', result)
     })
   })
 
@@ -103,26 +110,40 @@ app.get('/view', (req, res) => {
 
 })
 
-var saveTweet = (t) => {
+const saveTweet = (t) => {
 
-  // Insert some documents
-  collection.insertOne({
+  if(!t) { return 'Missing tweet data'; }
+  
+  const tweet = {
     'tid': t.id,
     'name': t.name,
     'screenName': t.screenName,
     'text' : t.text,
     'createdAt' : t.createdAt,
     'profileImage' : t.profileImage
-  }, (err, result) => {
-    if(err) {
-      console.log('error saving tweets', err)
-    } else {
-      console.log("Inserted " + result.insertedId + " documents into the collection");
-    }
-  });
-  
+  }
 
-  // var cursor = db.find()
-  // console.log(cursor) 
+  collection.insertOne(tweet, (err, result) => {
+    if(err) {
+      console.log('error saving tweets: ', err)
+      return err;
+    } 
+
+    console.log("saved tweet with id: ", result.insertedId);
+    return result.insertedId;
+  });
 } 
 
+const postTweet = (t) => {
+
+  if(!t) { return 'Missing tweet data'; }
+  if(!t.text ) { return 'Missing tweet content'; }
+
+  twitterClient.post('statuses/update', {status: t.text}, (error, tweet, response) => {
+    if(error) { return error; }
+
+    return 'tweet posted';
+    console.log(tweet);  // Tweet body. 
+    console.log(response);  // Raw response object. 
+  });
+}

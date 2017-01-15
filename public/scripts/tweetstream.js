@@ -9,6 +9,10 @@ socket.on('results', function (data) {
   updateDisplay(data)
 });
 
+socket.on('response', function (data) {
+  console.log('response', data)
+});
+
 socket.on('disconnect', function (data) {
   console.log('scoket disconnected');
   console.dir(data);
@@ -23,8 +27,6 @@ var updateDisplay = function(data) {
     console.log('missing data in updateDisplay')
     return;
   }
-
-  console.log('user.profile_image_url: ', data.user.profile_image_url)
 
   var container = document.createElement('div');
   container.classList.add('tweet');
@@ -64,11 +66,20 @@ var updateDisplay = function(data) {
   profileImage.classList.add('profile_image')
   profileImage.setAttribute('src', data.user.profile_image_url);
 
-  var linkSpan = document.createElement('p');
+  var submenu = document.createElement('p');
+  submenu.classList.add('submenu')
   var saveLink = document.createElement('a');
   var saveLinkText = document.createTextNode('Save');
   saveLink.appendChild(saveLinkText);
-  linkSpan.appendChild(saveLink);
+  submenu.appendChild(saveLink);
+
+  var pipe = document.createTextNode(' | ');
+  submenu.appendChild(pipe)
+
+  var postLink = document.createElement('a');
+  var postLinkText = document.createTextNode('Post it now');
+  postLink.appendChild(postLinkText);
+  submenu.appendChild(postLink);
 
   
   authorDiv.appendChild(profileImage);
@@ -78,15 +89,15 @@ var updateDisplay = function(data) {
   container.appendChild(authorDiv);
   container.appendChild(createdAt);
   container.appendChild(textDiv);
-  container.appendChild(saveLink)
+  container.appendChild(submenu)
 
   document.getElementById('results').appendChild(container);
   saveLink.addEventListener('click', function() { saveIt(data.id)}, false)
+  postLink.addEventListener('click', function() { postIt(data.id)}, false)
 
 } 
 
-var saveIt = function(t) {
-  console.log('saveIt', t)
+var getIt = function(t) {
   var el = document.getElementById(t);
   var name = el.getElementsByClassName('name')[0].textContent;
   var screenName = el.getElementsByClassName('screenName')[0].textContent;
@@ -94,15 +105,28 @@ var saveIt = function(t) {
   var createdAt = el.getElementsByClassName('createdAt')[0].textContent;
   var profileImage = el.getElementsByClassName('profile_image')[0].getAttribute('src')
 
-  var saveTweet = {
+  var tweet = {
     'id': t,
     'name' : name,
     'screenName' : screenName,
     'text' : text,
     'createdAt': createdAt, 
     'profileImage' : profileImage
-
   }
-  console.dir(saveTweet)
+
+  return tweet;
+}
+
+var saveIt = function(t) {
+  console.log('saveIt', t);
+  var saveTweet = getIt(t);
+  console.dir(saveTweet);
   socket.emit('save', saveTweet)
+}
+
+var postIt = function(t) {
+  console.log('postIt', t)
+  var postTweet = getIt(t);
+  console.dir(postTweet)
+  socket.emit('post', postTweet)
 }
