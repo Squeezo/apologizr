@@ -11,7 +11,7 @@ const twitterClient = require('./twitterClient'),
 
 
 const post = require('./routes/post');
-var socket, db, collection;
+var socket, db, collection, emitThis;
 
 app.use(express.static(__dirname + '/public'));
 app.engine('pug', require('pug').__express)
@@ -69,6 +69,11 @@ app.post('/search', (req, res) => {
       console.log('Posting Tweet')
       postTweet(t)
     })
+
+    emitThis = (msg) => {
+      socket.emit('response', msg)
+    }
+
   })
 
   twitterClient.stream('statuses/filter', {track: searchFor}, (stream) => {
@@ -87,6 +92,10 @@ app.post('/search', (req, res) => {
       
     });
     
+    stream.on("end", () => {
+        console.log('stream end: ', buffer);
+    });
+
     return res.render('search', {label: 'What are you looking for?', search:'Search'})
 
   });
@@ -141,7 +150,8 @@ const postTweet = (t) => {
   twitterClient.post('statuses/update', {status: t.text})
     .then( (tweet) => {
       console.log('post callback called: ',tweet.text)
-      socket.emit('response ', tweet.text);
+
+      emitThis(tweet.text);
     })
     .catch( (error) => {
       console.log('post error', error)

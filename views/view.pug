@@ -16,4 +16,7 @@ html
               p(class='screenName')= t.screenName
             p(class='createdAt')= t.createdAt
             div(class='text')= t.text
-        
+            span(class='submenu')
+              a(class='removeLink' data-id=t._id)='Remove'
+              |  | 
+              a(class='postLink' data-id=t._id)='Post it now'        
