@@ -62,13 +62,12 @@ app.post('/search', (req, res) => {
 
     socket.on('save', (t) => {
       console.log('Saving Tweet')
-      let result = saveTweet(t)
-      socket.emit('response', result)
+      saveTweet(t)
     })
 
     socket.on('post', (t) => {
       console.log('Posting Tweet')
-      let result = postTweet(t)
+      postTweet(t)
     })
   })
 
@@ -111,7 +110,7 @@ app.get('/view', (req, res) => {
 
 const saveTweet = (t) => {
 
-  if(!t) { return 'Missing tweet data'; }
+  if(!t) { socket.emit('response', 'Missing tweet data'); return; }
   
   const tweet = {
     'tid': t.id,
@@ -125,40 +124,27 @@ const saveTweet = (t) => {
   collection.insertOne(tweet, (err, result) => {
     if(err) {
       console.log('error saving tweets: ', err)
-      return err;
+      socket.emit('response', err);
+      return;
     } 
 
     console.log("saved tweet with id: ", result.insertedId);
-    return result.insertedId;
+    socket.emit('response', 'saved with id of ' + result.insertedId);
   });
 } 
 
 const postTweet = (t) => { 
 
-  if(!t) { return 'Missing tweet data'; }
-  if(!t.text ) { return 'Missing tweet content'; }
+  if(!t) { socket.emit('response', 'Missing tweet data'); return; }
+  if(!t.text ) { socket.emit('response', 'Missing tweet content'); return; }
 
-  postPromise = () => {
-      return new Promise( (resolve, reject) => { 
-        twitterClient.post('statuses/update', {status: t.text}, (error, tweet, response) => {
-          if(error) { 
-            reject(error) 
-          } else {
-            resolve(tweet);
-          }
-
-        });
-      });
-  }   
-
-  postPromise()
-  .then( (result) => {
-    console.log('promise resolved ', result)
-    socket.emit('response ', result)
-  })
-  .catch( (err) => {
-    console.log('promise failed ', err)
-    socket.emit('response ', result )
-  });
-
-} 
+  twitterClient.post('statuses/update', {status: t.text})
+    .then( (tweet) => {
+      console.log('post callback called: ',tweet.text)
+      socket.emit('response ', tweet.text);
+    })
+    .catch( (error) => {
+      console.log('post error', error)
+      socket.emit('response ', error); 
+    });
+}
