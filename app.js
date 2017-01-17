@@ -105,7 +105,7 @@ app.post('/search', (req, res) => {
 app.get('/view', (req, res) => {
 
   collection.find({}).toArray((err, docs) => {
-    console.log(docs)
+    // console.dir(docs)
     if(err) {
       return res.render('view', {label: 'Stored Tweets', err: err})
     }
@@ -113,7 +113,21 @@ app.get('/view', (req, res) => {
     return res.render('view', {label: 'Stored Tweets', storedTweets: docs} )
   });
 
-  
+})
+
+app.get('/remove/:tid', (req, res) => {
+  let tid = parseInt(req.params.tid);
+  console.log('tid is ', tid)
+  collection.remove( {'tid' : tid}, (err, result) => {
+    if(err) {
+      console.log('error removing tweets: ', err)
+      return res.redirect('/view'); 
+    } 
+
+    console.log("removed tweet: ", result.result.n);
+    // /console.dir(result)
+    return res.redirect('/view')    
+  })
 
 })
 
