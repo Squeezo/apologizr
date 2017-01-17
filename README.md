@@ -8,10 +8,7 @@ experiment. This is a work in progress. I apologize if you don't find this usefu
 
 Just horse_ing around for now. ;P 
 
-
-12th Jan 2107: Connect to Twitter. Search Twitter for a string. View results. Save selected tweets to mongodb. View saved tweets. 
-
-
+I'll post a proper README with deps and install instructions soon. 
 
 
 ## Contributors
