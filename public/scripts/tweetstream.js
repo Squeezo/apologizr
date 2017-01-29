@@ -27,7 +27,7 @@ var updateDisplay = function(data) {
     console.log('missing data in updateDisplay')
     return;
   }
-
+  console.log(data)
   var container = document.createElement('div');
   container.classList.add('tweet');
   container.setAttribute('id', data.id);

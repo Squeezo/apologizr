@@ -22,7 +22,7 @@ app.disable('x-powered-by')
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressValidator())
 
-server.listen(8080, (err, response) => {
+server.listen(8081, (err, response) => {
   if (err) console.log(err.stack)
   const port = server.address().port
   console.log('apologizr listening at port %s', port)
@@ -39,9 +39,49 @@ server.listen(8080, (err, response) => {
       collection = db.collection('storedTweets');
     }
   })
+
+  io.on('connection', (socket) => {
+    console.log('Connected')
+
+    socket.on('searchRequest', (searchFor) => {
+      console.log('Searching Twitter', searchFor)
+
+      twitterClient.stream('statuses/filter', {track: searchFor}, (stream) => {
+
+        stream.on('data', (tweets) => {
+          console.log('got new tweets')
+          if(!socket.emit) {
+            console.log('No socket connection')
+          } else {
+            socket.emit('searchResponse', tweets)
+          }
+        });
+        
+        stream.on('error', (error) => {
+          console.log(error);
+          
+        });
+        
+        stream.on("end", () => {
+            console.log('stream end: ', buffer);
+        });
+      })
+
+    })
+    socket.on('post', (t) => {
+      console.log('Posting Tweet')
+      postTweet(t)
+    })
+
+    emitThis = (msg) => {
+      socket.emit('response', msg)
+    }
+
+  })
+
 })
 
-app.use(post)
+//app.use(post)
 //app.use(search)
 
 
@@ -101,7 +141,7 @@ app.post('/search', (req, res) => {
   });
 
 })
-
+/*
 app.get('/view', (req, res) => {
 
   collection.find({}).toArray((err, docs) => {
@@ -172,3 +212,5 @@ const postTweet = (t) => {
       socket.emit('response ', error); 
     });
 }
+
+*/

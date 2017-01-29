@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>React</title>
+  <!-- Bootstrap Core CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/cerulean/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom Fonts -->
+  <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+  <script type='application/javascript' src='https://cdn.socket.io/socket.io-1.4.5.js'></script>
+</head>
+
+<body>
+  <div id="app"></div>
+  <script type='application/javascript'> 
+      var socket = io.connect('http://localhost:8081');
+      socket.on('connect', function(data) {
+        console.log('Connected')
+        status.innerHTML = "Connected!"
+      })
+
+      socket.on('response', function (data) {
+        status.innerHTML = data
+        console.log(data);
+      });
+
+      socket.on('disconnect', function (data) {
+        console.log('scoket disconnected');
+        console.dir(data);
+      });
+  </script>
+  <script src="client.min.js"></script>
+</body>
+
+</html>
