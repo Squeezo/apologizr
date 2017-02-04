@@ -7,7 +7,7 @@ export default class TweetList extends React.Component {
     
     return (
       tweets.map(function(tweet) {
-         <TweetDisplay tweet={tweet} />
+         <TweetDisplay tweet={tweet} key={tweet.id} />
       })
     );
   }

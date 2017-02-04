@@ -1,19 +1,15 @@
 import React from "react";
 import { Link } from "react-router";
 
-import Nav from "../components/layout/Nav";
+import Nav from "../components/Nav";
 
 export default class Layout extends React.Component {
-  ComponentDidMount() {
-    
-  }
 
   render() {
     const { location } = this.props;
     const containerStyle = {
       marginTop: "60px"
     };
-    console.log("layout");
     return (
       <div>
 
@@ -22,10 +18,7 @@ export default class Layout extends React.Component {
         <div class="container" style={containerStyle}>
           <div>
             <div>
-              <h1>Sorry</h1>
-
               {this.props.children}
-
             </div>
           </div>
         </div>

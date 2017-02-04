@@ -1,28 +1,35 @@
 import React from "react";
-import TweetList from '../components/TweetList'
+import TweetDisplay from '../components/TweetDisplay'
 
 export default class Search extends React.Component {
 
   constructor() {
     super();
-    this.state = {value : ''};
+    this.state = {value : '', tweets: []};
+    this.updateState = this.updateState.bind(this)
   }
 
-  ComponentDidMount () {
-    socket.on('searchResponse', this.updateState.bind(this))
+  componentWillMount () {
+    socket.on('searchResponse', this.updateState);
   }
+
+  componentWillUnmount () {
+    socket.emit('stopStream')
+    socket.removeListener('searchResponse')
+  }
+
 
   handleChange(event) {
     this.setState({value: event.target.value});
-    console.log('handleChange called', this.state.value)
+    //console.log('handleChange called', this.state.value)
   }
 
   updateState(tweets) {
     console.log('updatestate called')
+    let newTweets = this.state.tweets
+    newTweets.push(tweets);
+    this.setState({'tweets': newTweets})
     
-    if(tweets) {
-      this.setState('tweets': tweets)
-    }
   }
 
   searchTweets(event) {
@@ -32,10 +39,11 @@ export default class Search extends React.Component {
   }
 
   render() {
-    let list=null;
-    if (this.state.tweets) {
-      list= <TweetList tweets={this.state.tweets} />
-    }
+    const myTweets = this.state.tweets;
+    
+    const tweetStream = myTweets.map( (myTweet) => {
+      return <TweetDisplay tweet={myTweet} />
+    })
 
     return (
       <div>
@@ -43,9 +51,11 @@ export default class Search extends React.Component {
         <form onSubmit={this.searchTweets.bind(this)}>
           <input type="text" value={this.state.searchTerms} onChange={this.handleChange.bind(this)} /><button>search</button>
         </form>
-        {list}
-        
-      </div>
+        <div id='results'>
+        {tweetStream}
+
+        </div>
+     </div>
     );
   }
 }
