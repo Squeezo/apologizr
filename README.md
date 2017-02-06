@@ -1,8 +1,7 @@
 
 ## About
 
-A simple Express-based application to search, view and save Tweets. Used for the @GuyApologetic account, a Twitter
-experiment. This is a work in progress. I apologize if you don't find this useful. 
+A simple Express, React, Socket.io application to search, post, view and save Tweets. Used to manage the experimental @GuyApologetic Twitter account. This is a work in progress. I apologize if you don't find this useful. 
 
 "Why?", asked no one. 
 
