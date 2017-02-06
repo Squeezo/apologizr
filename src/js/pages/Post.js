@@ -12,11 +12,11 @@ export default class Post extends React.Component {
 
 
   componentWillMount() {
-    socket.on('response', this.handleResponse)
+    socket.on('postResponse', this.handleResponse)
   }
 
   componentWillUnmount() {
-    socket.removeListener('response')
+    socket.removeListener('postResponse')
   }
 
   handleChange(event) {

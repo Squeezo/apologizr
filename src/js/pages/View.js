@@ -30,7 +30,7 @@ export default class View extends React.Component {
     const myTweets = this.state.tweets;
     
     const storedTweets = myTweets.map( (myTweet) => {
-      return <TweetDisplay tweet={myTweet} />
+      return <TweetDisplay tweet={myTweet} type="view" />
     })
 
     return (

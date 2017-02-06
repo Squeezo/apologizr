@@ -42,7 +42,7 @@ export default class Search extends React.Component {
     const myTweets = this.state.tweets;
     
     const tweetStream = myTweets.map( (myTweet) => {
-      return <TweetDisplay tweet={myTweet} />
+      return <TweetDisplay tweet={myTweet} type="search" />
     })
 
     return (

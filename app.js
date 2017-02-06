@@ -68,6 +68,10 @@ server.listen(8081, (err, response) => {
       saveTweet(t)
     })
 
+    socket.on('deleteTweet', (t) => {
+      deleteTweet(t)
+    })
+
     socket.on('savedRequest', () => {
       collection.find({}).toArray((err, docs) => {
         if(err) {
@@ -100,12 +104,12 @@ const saveTweet = (t) => {
   collection.insertOne(t, (err, result) => {
     if(err) {
       console.log('error saving tweets: ', err)
-      socket.emit('response', err);
+      socket.emit('saveResponse', err);
       return;
     } 
 
     console.log("saved tweet with id: ", result.insertedId);
-    socket.emit('response', result.insertedId);
+    socket.emit('saveResponse', result.insertedId);
 
   });
 } 
@@ -118,10 +122,27 @@ const postTweet = (t) => {
     .then( (tweet) => {
       console.log('post callback called: ',tweet.text)
 
-      socket.emit('response', tweet.id)
+      socket.emit('postResponse', tweet.id)
     })
     .catch( (error) => {
       console.log('post error', error)
-      socket.emit('response ', error); 
+      socket.emit('postResponse ', error); 
     });
+}
+
+const deleteTweet = (t) => { 
+
+  if(!t) { socket.emit('response', 'Missing tweet data'); return; }
+
+  collection.remove({id: t}, (err, result) => {
+    if(err) {
+      console.log('error deleting tweet: ', err)
+      socket.emit('deleteResponse', err);
+      return;
+    } 
+
+    console.log("deleted tweet with id: ", t);
+    socket.emit('deleteResponse', 'success');
+
+  });
 }
