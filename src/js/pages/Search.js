@@ -48,9 +48,11 @@ export default class Search extends React.Component {
     return (
       <div>
         <h1>Search the sorry state of Twitter</h1>
-        <form onSubmit={this.searchTweets.bind(this)}>
-          <input type="text" value={this.state.searchTerms} onChange={this.handleChange.bind(this)} /><button>search</button>
-        </form>
+        <div className='panel'>
+          <form onSubmit={this.searchTweets.bind(this)}>
+            <input type="text" value={this.state.searchTerms} onChange={this.handleChange.bind(this)} /><button>search</button>
+          </form>
+        </div>
         <div id='results'>
         {tweetStream}
 

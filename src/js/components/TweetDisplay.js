@@ -46,25 +46,26 @@ export default class TweetDisplay extends React.Component {
 
   render() {
     const profileURL = 'https://twitter.com/' + this.props.tweet.user.screen_name
-    let submenu = <p className={"submenu"}><a onClick={this.deleteTweet}>Delete</a> | <a onClick={this.postTweet}>Post it now</a></p>
+    let submenu = <p className={"submenu"}><a className='btn btn-primary btn-sm' onClick={this.deleteTweet}>Delete</a> <a className='btn btn-primary btn-sm' onClick={this.postTweet}>Post it now</a></p>
     if (this.props.type === 'search') {
-      submenu = <p className={"submenu"}><a onClick={this.saveTweet}>Save</a> | <a onClick={this.postTweet}>Post it now</a></p>
+      submenu = <p className={"submenu"}><a className='btn btn-primary btn-sm' onClick={this.saveTweet}>Save</a> <a className='btn btn-primary btn-sm' onClick={this.postTweet}>Post it now</a></p>
     } 
 
     return (
-      <div className={"tweet"} id={this.props.tweet.id}>
-        <div className={"author"}>
+      <div className={"tweet"} id={this.props.tweet.id} className='panel panel-default'>
+        <div className={"author"} className='panel-body'>
           <a href={profileURL} target="_blank">
             <img className={"profile_image"} src={this.props.tweet.user.profile_image_url} /></a>
               <p className={"name"}>
                 <a href={profileURL} target="_blank">{this.props.tweet.user.name}</a>&nbsp;
                 <span className={"screenName"}>{this.props.tweet.user.screen_name}</span> &#149; 
                 <span className={"createdAt"}>{this.props.tweet.created_at}</span>
+                <div className={"text"}>{this.props.tweet.text}</div>
               </p>
           </div>
         
-        <div className={"text"}>{this.props.tweet.text}</div>
-        {submenu}
+        
+        <div className='panel-footer'>{submenu}</div>
       </div>
     );
   }
