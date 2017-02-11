@@ -7,6 +7,7 @@ export default class Search extends React.Component {
     super();
     this.state = {value : '', tweets: []};
     this.updateState = this.updateState.bind(this)
+    this.handleChange = this.handleChange.bind(this)
   }
 
   componentWillMount () {
@@ -17,7 +18,6 @@ export default class Search extends React.Component {
     socket.emit('stopStream')
     socket.removeListener('searchResponse')
   }
-
 
   handleChange(event) {
     this.setState({value: event.target.value});
@@ -41,8 +41,8 @@ export default class Search extends React.Component {
   render() {
     const myTweets = this.state.tweets;
     
-    const tweetStream = myTweets.map( (myTweet) => {
-      return <TweetDisplay tweet={myTweet} type="search" />
+    const tweetStream = myTweets.map( (myTweet, i) => {
+      return <TweetDisplay tweet={myTweet} key={i} type="search" />
     })
 
     return (
@@ -50,7 +50,7 @@ export default class Search extends React.Component {
         <h1>Search the sorry state of Twitter</h1>
         <div className='panel'>
           <form onSubmit={this.searchTweets.bind(this)}>
-            <input type="text" value={this.state.searchTerms} onChange={this.handleChange.bind(this)} /><button>search</button>
+            <input type="text" value={this.state.searchTerms} onChange={this.handleChange} /><button>search</button>
           </form>
         </div>
         <div id='results'>

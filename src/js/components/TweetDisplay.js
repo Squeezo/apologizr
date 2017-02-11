@@ -12,6 +12,7 @@ export default class TweetDisplay extends React.Component {
   componentWillMount() {
     socket.on('deleteResponse', (msg) => {
       console.log('deleteResponse: ', msg)
+      this.props.callback()
     })
 
     socket.on('postResponse', (msg) => {
@@ -56,12 +57,12 @@ export default class TweetDisplay extends React.Component {
         <div className={"author"} className='panel-body'>
           <a href={profileURL} target="_blank">
             <img className={"profile_image"} src={this.props.tweet.user.profile_image_url} /></a>
-              <p className={"name"}>
+              <div className={"name"}>
                 <a href={profileURL} target="_blank">{this.props.tweet.user.name}</a>&nbsp;
                 <span className={"screenName"}>{this.props.tweet.user.screen_name}</span> &#149; 
                 <span className={"createdAt"}>{this.props.tweet.created_at}</span>
                 <div className={"text"}>{this.props.tweet.text}</div>
-              </p>
+              </div>
           </div>
         
         

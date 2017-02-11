@@ -73,18 +73,22 @@ server.listen(8081, (err, response) => {
     })
 
     socket.on('savedRequest', () => {
-      collection.find({}).toArray((err, docs) => {
-        if(err) {
-          throw (err);
-        }
-
-        socket.emit('savedResponse', docs);
-      });
+      fetchTweets();
     })
 
   })
 
 })
+
+const fetchTweets = () => {
+    collection.find({}).toArray((err, docs) => {
+      if(err) {
+        throw (err);
+      }
+
+      socket.emit('savedResponse', docs);
+    });
+}
 
 const saveTweet = (t) => {
 
@@ -143,6 +147,7 @@ const deleteTweet = (t) => {
 
     console.log("deleted tweet with id: ", t);
     socket.emit('deleteResponse', 'success');
+    fetchTweets()
 
   });
 }
