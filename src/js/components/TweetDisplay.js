@@ -52,6 +52,15 @@ export default class TweetDisplay extends React.Component {
       submenu = <p className={"submenu"}><a className='btn btn-primary btn-sm' onClick={this.saveTweet}>Save</a> <a className='btn btn-primary btn-sm' onClick={this.postTweet}>Post it now</a></p>
     } 
 
+    let media_url  = null
+    let display_url = null
+    if (this.props.tweet.entities.media) {
+      if(this.props.tweet.entities.media[0].media_url) {
+        display_url = '//' + this.props.tweet.entities.media[0].display_url
+        media_url = <a href={display_url} target='_blank'><img className={"twitpic"} src={this.props.tweet.entities.media[0].media_url} /></a>
+        console.log(media_url)
+      }
+    }
     return (
       <div className={"tweet"} id={this.props.tweet.id} className='panel panel-default'>
         <div className={"author"} className='panel-body'>
@@ -62,6 +71,7 @@ export default class TweetDisplay extends React.Component {
                 <span className={"screenName"}>{this.props.tweet.user.screen_name}</span> &#149; 
                 <span className={"createdAt"}>{this.props.tweet.created_at}</span>
                 <div className={"text"}>{this.props.tweet.text}</div>
+                <div className={"text"}>{media_url}</div>
               </div>
           </div>
         
