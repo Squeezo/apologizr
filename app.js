@@ -5,6 +5,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const twitterClient = require('./twitterClient'),
       mongoClient = require('mongodb').MongoClient;
+const tweetFilter = require('./TweetFilter');
 
 var socket, db, collection, emitThis;
 
@@ -38,7 +39,10 @@ server.listen(8081, (err, response) => {
       twitterClient.stream('statuses/filter', {track: searchFor}, (stream) => {
 
         stream.on('data', (tweets) => {
-          socket.emit('searchResponse', tweets)
+
+          if(tweetFilter.check(tweets)) {
+            socket.emit('searchResponse', tweets)
+          }
         });
         
         stream.on('error', (error) => {
