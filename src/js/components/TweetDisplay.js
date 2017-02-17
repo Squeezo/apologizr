@@ -89,7 +89,8 @@ export default class TweetDisplay extends React.Component {
           <div className={"name"}>
             <a href={profileURL} target="_blank">{this.props.tweet.user.name}</a>&nbsp;
             <span className={"screenName"}>@{this.props.tweet.user.screen_name}</span> &#149; 
-            <span className={"createdAt"}>{this.props.tweet.created_at}</span>
+            <span className={"createdAt"}>{this.props.tweet.created_at}</span> &#149; 
+            <span className={'screenName'}>score: {this.props.tweet.sentiment.score} | comparative: {this.props.tweet.sentiment.comparative}</span> 
             <div className={"text"}>{this.props.tweet.text}</div>
             <div className={"text"}>{media_url}</div>
             {quote}

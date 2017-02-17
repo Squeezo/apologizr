@@ -3,6 +3,7 @@ const express = require('express')
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+const sentiment = require('sentiment'); 
 const twitterClient = require('./twitterClient'),
       mongoClient = require('mongodb').MongoClient;
 const tweetFilter = require('./TweetFilter');
@@ -41,6 +42,7 @@ server.listen(8081, (err, response) => {
         stream.on('data', (tweets) => {
 
           if(tweetFilter.check(tweets)) {
+            tweets.sentiment = sentiment(tweets.text)
             socket.emit('searchResponse', tweets)
           }
         });
