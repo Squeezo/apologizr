@@ -1,7 +1,7 @@
 import React from "react";
 import TweetDisplay from '../components/TweetDisplay'
 
-export default class View extends React.Component {
+export default class Saved extends React.Component {
 
   constructor() {
     super();

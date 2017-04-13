@@ -63,7 +63,7 @@ export default class TweetDisplay extends React.Component {
     } 
 
 
-    let media_url, display_url, quote = null
+    let media_url, display_url, quote, sentiment = null
     if (this.props.tweet.entities.media) {
       if(this.props.tweet.entities.media[0].media_url) {
         display_url = '//' + this.props.tweet.entities.media[0].display_url
@@ -80,6 +80,10 @@ export default class TweetDisplay extends React.Component {
         </div>
     }
 
+    if(this.props.tweet.sentiment) {
+      sentiment = <span className={'screenName'}>score: {this.props.tweet.sentiment.score} | comparative: {this.props.tweet.sentiment.comparative}</span>
+    }
+
     return (
       <div className={"tweet"} id={this.props.tweet.id} className='panel panel-default'>
         <div className={"author"} className='panel-body'>
@@ -90,7 +94,7 @@ export default class TweetDisplay extends React.Component {
             <a href={profileURL} target="_blank">{this.props.tweet.user.name}</a>&nbsp;
             <span className={"screenName"}>@{this.props.tweet.user.screen_name}</span> &#149; 
             <span className={"createdAt"}>{this.props.tweet.created_at}</span> &#149; 
-            <span className={'screenName'}>score: {this.props.tweet.sentiment.score} | comparative: {this.props.tweet.sentiment.comparative}</span> 
+            {sentiment}  
             <div className={"text"}>{this.props.tweet.text}</div>
             <div className={"text"}>{media_url}</div>
             {quote}

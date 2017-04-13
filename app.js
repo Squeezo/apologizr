@@ -27,6 +27,7 @@ server.listen(8081, (err, response) => {
     } else {
       console.log('connected to mongo') 
       collection = db.collection('storedTweets');
+      filters = db.collection('tweetFilters');
     }
   })
 
@@ -80,6 +81,22 @@ server.listen(8081, (err, response) => {
 
     socket.on('savedRequest', () => {
       fetchTweets();
+    })
+
+    socket.on('fetchFilters', () => {
+      fetchFilters();
+    })
+
+    socket.on('addFilter', (f) => {
+      addFilter(f);
+    })
+
+    socket.on('editFilter', (f) => {
+      editFilter(f);
+    })
+
+    socket.on('deleteFilter', (fid) => {
+      deleteFilter(fid);
     })
 
   })
@@ -154,6 +171,64 @@ const deleteTweet = (t) => {
     console.log("deleted tweet with id: ", t);
     socket.emit('deleteResponse', 'success');
     fetchTweets()
+
+  });
+}
+
+const fetchFilters = () => {
+  filters.find({}).toArray((err, docs) => {
+    if(err) {
+      throw (err);
+    }
+
+    socket.emit('filtersResponse', docs);
+  });
+}
+
+const addFilter = (f) => {
+  console.log('addFilter', f)
+  if(!f) { socket.emit('addFilterResponse', 'Missing filter data'); return; }
+  
+  let createdDate = new Date()
+   const filter = {
+    text: f,
+    created_at: createdDate.toTimeString(),
+    hits: { count:0}
+  }
+
+  filters.insertOne(filter, (err, result) => {
+    if(err) {
+      console.log('error saving filter: ', err)
+      socket.emit('addFilterResponse', err);
+      return;
+    } 
+
+    console.log("saved filter with id: ", result.insertedId);
+    socket.emit('addFilterResponse', result.insertedId);
+    fetchFilters();
+
+  });
+} 
+
+
+const editFilter = (filter) => {
+  
+}
+
+const deleteFilter = (fid) => {
+  console.log('deleteFilter', fid._id)
+  if(!fid) { socket.emit('deleteFilterResponse', 'Missing filter data'); return; }
+
+  collection.remove({_id: fid}, (err, result) => {
+    if(err) {
+      console.log('error deleting filter: ', err)
+      socket.emit('deleteFilterResponse', err);
+      return;
+    } 
+
+    console.log("deleted filter with id: ", fid._id);
+    socket.emit('deleteFilterResponse', 'success');
+    fetchFilters()
 
   });
 }

@@ -19,7 +19,8 @@ export default class Nav extends React.Component {
     const { collapsed } = this.state;
     const searchClass = location.pathname === "/" ? "active" : "";
     const postClass = location.pathname.match(/^\/post/) ? "active" : "";
-    const viewClass = location.pathname.match(/^\/view/) ? "active" : "";
+    const savedClass = location.pathname.match(/^\/saved/) ? "active" : "";
+    const filtersClass = location.pathname.match(/^\/filters/) ? "active" : "";
 
     const navClass = collapsed ? "collapse" : "";
 
@@ -43,8 +44,11 @@ export default class Nav extends React.Component {
                 <Link to="post" onClick={this.toggleCollapse.bind(this)}>Post</Link>
               </li>
               <li activeClassName="active">
-                <Link to="view" onClick={this.toggleCollapse.bind(this)}>View</Link>
+                <Link to="saved" onClick={this.toggleCollapse.bind(this)}>Saved</Link>
               </li>
+              <li activeClassName="active">
+                <Link to="filters" onClick={this.toggleCollapse.bind(this)}>Filters</Link>
+              </li>              
             </ul>
           </div>
         </div>
