@@ -8,10 +8,9 @@ const twitterClient = require('./twitterClient'),
       mongoClient = require('mongodb').MongoClient;
 const tweetFilter = require('./TweetFilter');
 
-var socket, db, collection, emitThis;
+var socket, db, collection, emitThis, filterList;
 
 app.disable('x-powered-by')
-
 
 server.listen(8081, (err, response) => {
   if (err) console.log(err.stack)
@@ -180,7 +179,6 @@ const fetchFilters = () => {
     if(err) {
       throw (err);
     }
-
     socket.emit('filtersResponse', docs);
   });
 }
@@ -192,6 +190,7 @@ const addFilter = (f) => {
   let createdDate = new Date()
    const filter = {
     text: f,
+    hash: f.hashCode(),
     created_at: createdDate.toTimeString(),
     hits: { count:0}
   }
@@ -212,23 +211,45 @@ const addFilter = (f) => {
 
 
 const editFilter = (filter) => {
-  
+  console.log('editFilter called', filter)
+  filters.update({hash: filter.hash}, {$set:{text:filter.value, hash: filter.value.hashCode()}}, (err,result) => {
+    if(err) {
+      console.log('error updating filter: ', err)
+      socket.emit('editFilterResponse', err);
+      return;
+    }
+
+    console.log("edited filter: ", result.result.nModified);
+    socket.emit('editFilterResponse', 'success');
+    fetchFilters()
+  });
 }
 
-const deleteFilter = (fid) => {
-  console.log('deleteFilter', fid._id)
-  if(!fid) { socket.emit('deleteFilterResponse', 'Missing filter data'); return; }
+const deleteFilter = (filter) => {
+  console.log('deleteFilter', filter.hash)
+  if(!filter.hash) { console.log('missing hash', filter.hash); socket.emit('deleteFilterResponse', 'Missing filter data'); return; }
 
-  collection.remove({_id: fid}, (err, result) => {
+  filters.remove({hash: filter.hash}, (err, result) => {
     if(err) {
       console.log('error deleting filter: ', err)
       socket.emit('deleteFilterResponse', err);
       return;
     } 
 
-    console.log("deleted filter with id: ", fid._id);
+    console.log("deleted filter with id: ", result.result.n);
     socket.emit('deleteFilterResponse', 'success');
     fetchFilters()
 
-  });
+ });
 }
+
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
