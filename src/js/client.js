@@ -7,6 +7,7 @@ import Post from "./pages/Post";
 import Saved from "./pages/Saved";
 import Filters from './pages/Filters';
 import Layout from './pages/Layout';
+import Images from './pages/Images';
 
 const app = document.getElementById('app');
 
@@ -18,6 +19,7 @@ ReactDOM.render(
       <Route path="post" name="post" component={Post}></Route>
       <Route path="saved" name="saved" component={Saved}></Route>
       <Route path="filters" name="filters" component={Filters}></Route>
+      <Route path="images" name="images" component={Images}></Route>
     </Route>
   </Router>,
 app);

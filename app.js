@@ -7,6 +7,9 @@ const sentiment = require('sentiment');
 const twitterClient = require('./twitterClient'),
       mongoClient = require('mongodb').MongoClient;
 const tweetFilter = require('./TweetFilter');
+const Scraper = require ('images-scraper'),
+bing = new Scraper.Bing();
+
 
 var socket, db, collection, emitThis, filterList;
 
@@ -20,12 +23,13 @@ server.listen(8081, (err, response) => {
     console.log('Error connecting to Twitter.')
   }
   
-  mongoClient.connect('mongodb://localhost:27017/apologizr', (err, db) => {
+  mongoClient.connect('mongodb://localhost:27017', (err, client) => {
     if(err) {
       console.log('error connecting to mongodb', err)
     } else {
-      console.log('connected to mongo') 
-      collection = db.collection('storedTweets');
+      console.log('connected to mongo')
+      const db = client.db('grimshackle') 
+      collection = db.collection('savedImages');
       filters = db.collection('tweetFilters');
     }
   })
@@ -35,7 +39,7 @@ server.listen(8081, (err, response) => {
     console.log('Connected')
 
     socket.on('searchRequest', (searchFor) => {
-      //console.log('Searching Twitter', searchFor)
+      console.log('Searching Twitter', searchFor)
 
       twitterClient.stream('statuses/filter', {track: searchFor}, (stream) => {
 
@@ -98,9 +102,60 @@ server.listen(8081, (err, response) => {
       deleteFilter(fid);
     })
 
+    socket.on('imageRequest', (terms) => {
+      searchImages(terms);
+    })
+
   })
 
 })
+
+
+const searchImages = (terms) => {
+    console.log('searchImages', terms);
+
+    let offset=0;
+    if(terms.offset) {
+      offset= terms.offset;
+    }
+
+    let num = terms.num || 5; 
+    bing.list({
+      keyword: terms.keyword,
+      num: num,
+      offset: offset,
+      detail: true
+    })
+    .then(function (resp) {
+      console.log('results from bing', resp);
+      resp.forEach( (item,i) => {
+        //console.log('item', item)
+        const filePath = 'images/';
+        let fileName = Date.now() +'.'+item.format;
+
+          const image = {
+        
+            url: item.url,
+            fileName: fileName,
+            filePrefix: filePath,
+            format: item.format,
+            height: item.height,
+            width: item.width,
+            thumb: item.thumb,
+            size: item.size,
+            created_at: Date.now(),
+            posted: false,
+            
+          }
+
+        //download(image, saveImage);
+        socket.emit('imageResponse', image);
+      })
+    }).catch(function(err) {
+      console.log('err',err);
+    })
+    
+}
 
 const fetchTweets = () => {
     collection.find({}).toArray((err, docs) => {
