@@ -2,14 +2,22 @@ require('dotenv').config();
 const express = require('express')
 const app = express();
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, { origins: '*:*'});
+
 const sentiment = require('sentiment'); 
+const cors = require('cors');
 const twitterClient = require('./twitterClient'),
       mongoClient = require('mongodb').MongoClient;
 const tweetFilter = require('./TweetFilter');
-const Scraper = require ('images-scraper'),
-bing = new Scraper.Bing();
+const Scraper = require ('images-scraper');
+const bingClient = require('./bingClient');
+const https = require('https');
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 var socket, db, collection, emitThis, filterList;
 
@@ -106,54 +114,61 @@ server.listen(8081, (err, response) => {
       searchImages(terms);
     })
 
+    socket.on('saveImage', (t) => {
+      saveImage(t)
+    })
+
   })
 
 })
 
 
 const searchImages = (terms) => {
-    console.log('searchImages', terms);
+  console.log('searchImages', terms);
 
-    let offset=0;
-    if(terms.offset) {
-      offset= terms.offset;
+  let offset=0;
+  if(terms.offset) {
+    offset= terms.offset;
+  }
+
+  let count = terms.count || 5; 
+
+  let request_params = {
+    method : 'GET',
+    hostname : 'api.cognitive.microsoft.com',
+    path : '/bing/v7.0/images/search?q=' + encodeURIComponent(terms.keyword),
+    count : count, 
+    offset : offset,
+    headers : {
+    'Ocp-Apim-Subscription-Key' : process.env.BING_SEARCH_API_1
     }
+  };
 
-    let num = terms.num || 5; 
-    bing.list({
-      keyword: terms.keyword,
-      num: num,
-      offset: offset,
-      detail: true
-    })
-    .then(function (resp) {
-      console.log('results from bing', resp);
-      resp.forEach( (item,i) => {
-        //console.log('item', item)
-        const filePath = 'images/';
-        let fileName = Date.now() +'.'+item.format;
+  let response_handler = function (response) {
+    let body = '';
 
-          const image = {
-        
-            url: item.url,
-            fileName: fileName,
-            filePrefix: filePath,
-            format: item.format,
-            height: item.height,
-            width: item.width,
-            thumb: item.thumb,
-            size: item.size,
-            created_at: Date.now(),
-            posted: false,
-            
-          }
+    response.on('data', function (d) {
+      body += d;
+    });
 
-        //download(image, saveImage);
-        socket.emit('imageResponse', image);
-      })
-    }).catch(function(err) {
-      console.log('err',err);
-    })
+    response.on('end', function () {
+      const res = JSON.parse(body);
+      console.log('nextOffset', res.nextOffset)
+      socket.emit('nextOffset', res.nextOffset)
+      if(res.value) {
+        res.value.forEach( item => {
+          socket.emit('imageResponse', item)
+        })      
+      }
+    });
+
+  };
+
+
+
+  let req = https.request(request_params, response_handler);
+  req.end();
+
     
 }
 
@@ -209,6 +224,40 @@ const postTweet = (t) => {
       console.log('post error', error)
       socket.emit('postResponse ', error); 
     });
+}
+
+const postImage = (t) => { 
+
+  if(!t) { socket.emit('response', 'Missing image data'); return; }
+  console.log('postImage not implemented yet')
+
+  // twitterClient.post('statuses/update', {status: t})
+  //   .then( (tweet) => {
+  //     console.log('post callback called: ',tweet.text)
+
+  //     socket.emit('postResponse', tweet.id)
+  //   })
+  //   .catch( (error) => {
+  //     console.log('post error', error)
+  //     socket.emit('postResponse ', error); 
+  //   });
+}
+
+const saveImage = (t) => {
+
+  if(!t) { socket.emit('response', 'Missing image data'); return; }
+  
+  collection.insertOne(t, (err, result) => {
+    if(err) {
+      console.log('error saving image: ', err)
+      socket.emit('saveImageResponse', err);
+      return;
+    } 
+
+    console.log("saved image with id: ", result.insertedId);
+    socket.emit('saveImageResponse', result.insertedId);
+
+  });
 }
 
 const deleteTweet = (t) => { 
